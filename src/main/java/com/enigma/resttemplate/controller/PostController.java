@@ -1,12 +1,14 @@
 package com.enigma.resttemplate.controller;
 
-import com.enigma.resttemplate.entities.Posts;
+import com.enigma.resttemplate.entities.Post;
 import com.enigma.resttemplate.response.PostResponse;
 import com.enigma.resttemplate.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,23 +18,23 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Posts[]> getAllPosts() {
+    public ResponseEntity<List<PostResponse>> getAllPosts() {
       return postService.getAllPosts();
     }
 
     @GetMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getPostById(@PathVariable String id) {
+    public ResponseEntity<PostResponse> getPostById(@PathVariable String id) {
        return postService.getPostById(id);
     }
 
     @GetMapping(path = "/comments{postId}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getPostCommentsByPostId(@RequestParam Long postId) {
+    public ResponseEntity<PostResponse> getPostCommentsByPostId(@RequestParam Long postId) {
       return postService.getPostCommentsByPostId(postId);
     }
 
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> createPost(@RequestBody Posts request){
+    public ResponseEntity<PostResponse> createPost(@RequestBody Post request){
         return postService.createPost(request);
     }
 
@@ -42,10 +44,5 @@ public class PostController {
 //        Posts posts = restTemplate.postForObject(apiUrls, request, Posts.class);
 //        return ResponseEntity.ok(posts);
 //    }
-
-    @GetMapping(value = "/{id}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> getPostByIdComments(@PathVariable Integer postId){
-        return postService.getPostsCommentById(postId);
-    }
 
 }

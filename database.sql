@@ -8,10 +8,10 @@ SHOW TABLES;
 
 DESC table_name;
 
-SHOW CREATE TABLE table_name;
+SHOW CREATE TABLE m_posts;
 
-SELECT * FROM table_name;
+SELECT * FROM m_posts;
 
-DELETE FROM table_name;
+DELETE FROM m_posts;
 
-DROP TABLE table_name;
+DROP TABLE m_posts;
