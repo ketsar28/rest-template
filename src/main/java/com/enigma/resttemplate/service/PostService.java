@@ -3,14 +3,12 @@ package com.enigma.resttemplate.service;
 import com.enigma.resttemplate.entities.Post;
 import com.enigma.resttemplate.repository.PostRepository;
 import com.enigma.resttemplate.response.PostResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -145,8 +143,7 @@ public class PostService {
             HttpEntity<Post> requestEntity = new HttpEntity<>(request, headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(apiUrls, HttpMethod.POST, requestEntity, String.class);
             Post post = objectMapper.readValue(responseEntity.getBody(), Post.class);
-            post.setId(post.getId() + 1);
-            post = postRepository.save(post);
+            postRepository.save(post);
 
             PostResponse response = toPostResponse(post);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);

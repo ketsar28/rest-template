@@ -3,7 +3,6 @@ package com.enigma.resttemplate.controller;
 import com.enigma.resttemplate.entities.Post;
 import com.enigma.resttemplate.response.PostResponse;
 import com.enigma.resttemplate.service.PostService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -48,12 +47,4 @@ public class PostController {
     public ResponseEntity<String> deletePost(@PathVariable Integer id){
         return postService.deletePost(id);
     }
-
-//    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-//    public ResponseEntity<Posts> createPost(@RequestBody Posts request){
-//        String apiUrls = "https://jsonplaceholder.typicode.com/posts";
-//        Posts posts = restTemplate.postForObject(apiUrls, request, Posts.class);
-//        return ResponseEntity.ok(posts);
-//    }
-
 }
