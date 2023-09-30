@@ -33,8 +33,8 @@ public class PostService {
 
     private static PostResponse toPostResponse(Post post) {
         return PostResponse.builder()
-                .idPost(post.getId())
-                .userIdPost(post.getUserId())
+                .idPost(post.getUserId())
+                .userIdPost(post.getId())
                 .titlePost(post.getTitle())
                 .bodyPost(post.getBody())
                 .build();
