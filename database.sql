@@ -11,6 +11,7 @@ DESC table_name;
 SHOW CREATE TABLE m_posts;
 
 SELECT * FROM m_posts;
+ALTER TABLE m_posts MODIFY COLUMN body LONGTEXT;
 
 DELETE FROM m_posts;
 

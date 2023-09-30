@@ -3,6 +3,7 @@ package com.enigma.resttemplate.controller;
 import com.enigma.resttemplate.entities.Post;
 import com.enigma.resttemplate.response.PostResponse;
 import com.enigma.resttemplate.service.PostService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,12 +24,12 @@ public class PostController {
     }
 
     @GetMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostResponse> getPostById(@PathVariable String id) {
+    public ResponseEntity<PostResponse> getPostById(@PathVariable Integer id) {
        return postService.getPostById(id);
     }
 
     @GetMapping(path = "/comments{postId}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostResponse> getPostCommentsByPostId(@RequestParam Long postId) {
+    public ResponseEntity<List<PostResponse>> getPostCommentsByPostId(@RequestParam Integer postId) {
       return postService.getPostCommentsByPostId(postId);
     }
 
@@ -36,6 +37,11 @@ public class PostController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<PostResponse> createPost(@RequestBody Post request){
         return postService.createPost(request);
+    }
+
+    @PutMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PostResponse> updatePost(@RequestBody Post request, @PathVariable Integer id){
+        return postService.updatePost(request, id);
     }
 
 //    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

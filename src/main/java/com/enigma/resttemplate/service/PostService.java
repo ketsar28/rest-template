@@ -3,16 +3,19 @@ package com.enigma.resttemplate.service;
 import com.enigma.resttemplate.entities.Post;
 import com.enigma.resttemplate.repository.PostRepository;
 import com.enigma.resttemplate.response.PostResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -82,14 +85,49 @@ public class PostService {
         return getResponseEntity(apiUrls);
     }
 
-    public ResponseEntity<PostResponse> getPostById(String id) {
+    public ResponseEntity<PostResponse> getPostById(Integer id) {
         String apiUrls = BASE_URL + "/posts/"+id;
         return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
     }
 
-    public ResponseEntity<PostResponse> getPostCommentsByPostId(Long postId) {
-        String apiUrls = BASE_URL + "/comments?postId="+postId;
-        return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
+    public ResponseEntity<List<PostResponse>> getPostCommentsByPostId(Integer postId) {
+        // cari data postId di db
+        List<PostResponse> postResponses = new ArrayList<>();
+        List<Post> matchingPosts = postRepository.findByUserId(postId);
+        // kalo ada ambil yang di db dan masukan ke postResponse
+        if (!matchingPosts.isEmpty()) {
+            postResponses = matchingPosts.stream()
+                    .map(PostService::toPostResponse)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(postResponses);
+        } else {
+            // kalo ga ada masukan dlu datanya ke db
+            String apiUrls = BASE_URL + "/posts";
+            ResponseEntity<String> responseEntity = restTemplate.getForEntity(apiUrls, String.class);
+            if (responseEntity.getStatusCode().is2xxSuccessful()) {
+                try {
+                    String responseBody = responseEntity.getBody();
+                    List<Post> postsFromAPI = objectMapper.readValue(responseBody, new TypeReference<List<Post>>() {});
+                    postRepository.saveAll(postsFromAPI);
+
+                   matchingPosts = postRepository.findByUserId(postId);
+
+                    // kalo udah disimpan ambil data yang di db dan masukan ke postResponse
+                    if (!matchingPosts.isEmpty()) {
+                        postResponses = matchingPosts.stream()
+                                .map(PostService::toPostResponse)
+                                .collect(Collectors.toList());
+                    }
+                    return ResponseEntity.ok(postResponses);
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                }
+            } else {
+                return ResponseEntity.status(responseEntity.getStatusCode()).body(null);
+            }
+        }
     }
 
     public ResponseEntity<PostResponse> createPost(Post request){
@@ -110,5 +148,23 @@ public class PostService {
             exception.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    public ResponseEntity<PostResponse> updatePost(Post request, Integer id){
+       Optional<Post> isExistsPost = postRepository.findById(id);
+//        ResponseEntity<PostResponse> isExistsPost = getPostById(id);
+
+        if(isExistsPost.isPresent()) {
+            Post post = isExistsPost.get();
+
+            post.setTitle(request.getTitle());
+            post.setBody(request.getBody());
+            post = postRepository.save(post);
+
+            PostResponse postResponse = toPostResponse(post);
+
+            return ResponseEntity.ok(postResponse);
+        }
+        throw  new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
     }
 }
