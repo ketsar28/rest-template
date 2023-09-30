@@ -44,6 +44,11 @@ public class PostController {
         return postService.updatePost(request, id);
     }
 
+    @DeleteMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> deletePost(@PathVariable Integer id){
+        return postService.deletePost(id);
+    }
+
 //    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
 //    public ResponseEntity<Posts> createPost(@RequestBody Posts request){
 //        String apiUrls = "https://jsonplaceholder.typicode.com/posts";

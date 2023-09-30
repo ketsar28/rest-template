@@ -81,8 +81,14 @@ public class PostService {
     }
 
     public ResponseEntity<List<PostResponse>> getAllPosts() {
-        String apiUrls = BASE_URL + "/posts";
-        return getResponseEntity(apiUrls);
+        List<Post> posts = postRepository.findAll();
+        if(posts.isEmpty()) {
+            String apiUrls = BASE_URL + "/posts";
+            return getResponseEntity(apiUrls);
+        }
+
+        List<PostResponse> responses = posts.stream().map(PostService::toPostResponse).collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 
     public ResponseEntity<PostResponse> getPostById(Integer id) {
@@ -138,8 +144,8 @@ public class PostService {
             // bungkus data request dalam http entity
             HttpEntity<Post> requestEntity = new HttpEntity<>(request, headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(apiUrls, HttpMethod.POST, requestEntity, String.class);
-
             Post post = objectMapper.readValue(responseEntity.getBody(), Post.class);
+            post.setId(post.getId() + 1);
             post = postRepository.save(post);
 
             PostResponse response = toPostResponse(post);
@@ -152,7 +158,6 @@ public class PostService {
 
     public ResponseEntity<PostResponse> updatePost(Post request, Integer id){
        Optional<Post> isExistsPost = postRepository.findById(id);
-//        ResponseEntity<PostResponse> isExistsPost = getPostById(id);
 
         if(isExistsPost.isPresent()) {
             Post post = isExistsPost.get();
@@ -165,6 +170,16 @@ public class PostService {
 
             return ResponseEntity.ok(postResponse);
         }
-        throw  new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
+    }
+
+    public ResponseEntity<String> deletePost(Integer id) {
+        Optional<Post> isPostExists = postRepository.findById(id);
+        if(isPostExists.isPresent()) {
+            postRepository.deleteById(id);
+            return ResponseEntity.ok("data in " + id + " has been deleted");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("post not found");
+        }
     }
 }
