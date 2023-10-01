@@ -1,9 +1,11 @@
 package com.enigma.resttemplate.controller;
 
 import com.enigma.resttemplate.dto.request.PostRequest;
+import com.enigma.resttemplate.dto.response.PostCommentResponse;
 import com.enigma.resttemplate.entities.Post;
 import com.enigma.resttemplate.dto.response.PostResponse;
 import com.enigma.resttemplate.service.PostService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,7 @@ public class PostController {
     }
 
     @GetMapping(path = "/comments{postId}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostResponse> getPostCommentsByPostId(@RequestParam Integer postId) {
+    public ResponseEntity<List<PostCommentResponse>> getPostCommentsByPostId(@RequestParam Integer postId) throws JsonProcessingException {
       return postService.getPostCommentsByPostId(postId);
     }
 

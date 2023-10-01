@@ -1,9 +1,13 @@
 package com.enigma.resttemplate.service;
 
 import com.enigma.resttemplate.dto.request.PostRequest;
+import com.enigma.resttemplate.dto.response.PostCommentResponse;
 import com.enigma.resttemplate.entities.Post;
+import com.enigma.resttemplate.entities.PostComment;
+import com.enigma.resttemplate.repository.PostCommentRepository;
 import com.enigma.resttemplate.repository.PostRepository;
 import com.enigma.resttemplate.dto.response.PostResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +27,7 @@ import java.util.stream.Collectors;
 public class PostService {
     private final RestTemplate restTemplate;
     private final PostRepository postRepository;
+    private final PostCommentRepository postCommentRepository;
     private final ObjectMapper objectMapper;
     // kode lebih rapih (clean code)
     // tidak ada data yang redundan (refactoring)
@@ -50,6 +55,26 @@ public class PostService {
                     .build();
 
             return ResponseEntity.ok(postResponse);
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "failed api");
+        }
+    }
+    private ResponseEntity<List<PostCommentResponse>> responseMethodGetPostComment(String apiUrl) throws JsonProcessingException {
+        ResponseEntity<String> response = restTemplate.getForEntity(apiUrl, String.class);
+        if (response.getStatusCode().is2xxSuccessful()) {
+            String responseBody = response.getBody();
+            List<PostComment> postComments = objectMapper.readValue(responseBody, new TypeReference<>() {});
+            List<PostCommentResponse> postCommentResponses = postComments.stream()
+                    .map(postComment -> PostCommentResponse.builder()
+                            .idPost(postComment.getPostId())
+                            .userIdPost(postComment.getId())
+                            .namePost(postComment.getName())
+                            .emailPost(postComment.getEmail())
+                            .bodyPost(postComment.getBody())
+                            .build())
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(postCommentResponses);
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "failed api");
         }
@@ -86,9 +111,9 @@ public class PostService {
         return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
     }
 
-    public ResponseEntity<PostResponse> getPostCommentsByPostId(Integer postId) {
+    public ResponseEntity<List<PostCommentResponse>> getPostCommentsByPostId(Integer postId) throws JsonProcessingException {
         String apiUrls = BASE_URL + "/comments?postId="+postId;
-        return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
+        return responseMethodGetPostComment(apiUrls);
     }
 
     public ResponseEntity<PostResponse> createPost(PostRequest request){

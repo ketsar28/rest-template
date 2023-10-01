@@ -7,6 +7,7 @@ USE rest_template_db;
 SHOW TABLES;
 
 DESC table_name;
+DESC m_post_comments;
 
 SHOW CREATE TABLE m_posts;
 
