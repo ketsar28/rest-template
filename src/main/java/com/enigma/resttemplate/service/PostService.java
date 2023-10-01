@@ -62,9 +62,8 @@ public class PostService {
           try{
               String responseBody = responseEntity.getBody();
               List<Post> posts = objectMapper.readValue(responseBody, new TypeReference<>(){});
-              List<Post> saveData = postRepository.saveAll(posts);
 
-              List<PostResponse> postResponses = saveData.stream()
+              List<PostResponse> postResponses = posts.stream()
                       .map(PostService::toPostResponse)
                       .collect(Collectors.toList());
 
@@ -79,66 +78,18 @@ public class PostService {
     }
 
     public ResponseEntity<List<PostResponse>> getAllPosts() {
-        List<Post> posts = postRepository.findAll();
-        if(posts.isEmpty()) {
-            String apiUrls = BASE_URL + "/posts";
-            return getResponseEntity(apiUrls);
-        }
-
-        List<PostResponse> responses = posts.stream().map(PostService::toPostResponse).collect(Collectors.toList());
-        return ResponseEntity.ok(responses);
+        String apiUrls = BASE_URL + "/posts";
+        return getResponseEntity(apiUrls);
     }
 
     public ResponseEntity<PostResponse> getPostById(Integer id) {
-        Optional<Post> isPostExists = postRepository.findById(id);
-        if(isPostExists.isPresent()) {
-            Post post = isPostExists.get();
-            PostResponse postResponse = toPostResponse(post);
-            return ResponseEntity.ok(postResponse);
-        } else {
-            String apiUrls = BASE_URL + "/posts/"+id;
-            return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
-        }
+        String apiUrls = BASE_URL + "/posts/"+id;
+        return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
     }
 
-    public ResponseEntity<List<PostResponse>> getPostCommentsByPostId(Integer postId) {
-        // cari data postId di db
-        List<PostResponse> postResponses = new ArrayList<>();
-        List<Post> matchingPosts = postRepository.findByUserId(postId);
-        // kalo ada ambil yang di db dan masukan ke postResponse
-        if (!matchingPosts.isEmpty()) {
-            postResponses = matchingPosts.stream()
-                    .map(PostService::toPostResponse)
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.ok(postResponses);
-        } else {
-            // kalo ga ada masukan dlu datanya ke db
-            String apiUrls = BASE_URL + "/posts";
-            ResponseEntity<String> responseEntity = restTemplate.getForEntity(apiUrls, String.class);
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                try {
-                    String responseBody = responseEntity.getBody();
-                    List<Post> postsFromAPI = objectMapper.readValue(responseBody, new TypeReference<List<Post>>() {});
-                    postRepository.saveAll(postsFromAPI);
-
-                   matchingPosts = postRepository.findByUserId(postId);
-
-                    // kalo udah disimpan ambil data yang di db dan masukan ke postResponse
-                    if (!matchingPosts.isEmpty()) {
-                        postResponses = matchingPosts.stream()
-                                .map(PostService::toPostResponse)
-                                .collect(Collectors.toList());
-                    }
-                    return ResponseEntity.ok(postResponses);
-                } catch (IOException exception) {
-                    exception.printStackTrace();
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-                }
-            } else {
-                return ResponseEntity.status(responseEntity.getStatusCode()).body(null);
-            }
-        }
+    public ResponseEntity<PostResponse> getPostCommentsByPostId(Integer postId) {
+        String apiUrls = BASE_URL + "/comments?postId="+postId;
+        return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
     }
 
     public ResponseEntity<PostResponse> createPost(Post request){

@@ -28,7 +28,7 @@ public class PostController {
     }
 
     @GetMapping(path = "/comments{postId}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<PostResponse>> getPostCommentsByPostId(@RequestParam Integer postId) {
+    public ResponseEntity<PostResponse> getPostCommentsByPostId(@RequestParam Integer postId) {
       return postService.getPostCommentsByPostId(postId);
     }
 

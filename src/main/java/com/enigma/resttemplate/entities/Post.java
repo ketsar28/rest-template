@@ -2,9 +2,7 @@ package com.enigma.resttemplate.entities;
 
 import lombok.*;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 
 @Getter
@@ -16,6 +14,7 @@ import javax.persistence.Id;
 @Table(name = "m_posts")
 public class Post {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String title;
     private String body;
