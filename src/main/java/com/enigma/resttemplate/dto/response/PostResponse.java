@@ -1,4 +1,4 @@
-package com.enigma.resttemplate.response;
+package com.enigma.resttemplate.dto.response;
 
 import lombok.*;
 

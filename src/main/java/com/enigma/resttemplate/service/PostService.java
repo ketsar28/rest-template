@@ -1,8 +1,9 @@
 package com.enigma.resttemplate.service;
 
+import com.enigma.resttemplate.dto.request.PostRequest;
 import com.enigma.resttemplate.entities.Post;
 import com.enigma.resttemplate.repository.PostRepository;
-import com.enigma.resttemplate.response.PostResponse;
+import com.enigma.resttemplate.dto.response.PostResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -92,18 +91,25 @@ public class PostService {
         return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
     }
 
-    public ResponseEntity<PostResponse> createPost(Post request){
+    public ResponseEntity<PostResponse> createPost(PostRequest request){
         try {
             String apiUrls = BASE_URL + "/posts";
             // set request header
             HttpHeaders headers = new HttpHeaders();
             // bungkus data request dalam http entity
-            HttpEntity<Post> requestEntity = new HttpEntity<>(request, headers);
+            HttpEntity<PostRequest> requestEntity = new HttpEntity<>(request, headers);
             ResponseEntity<String> responseEntity = restTemplate.exchange(apiUrls, HttpMethod.POST, requestEntity, String.class);
-            Post post = objectMapper.readValue(responseEntity.getBody(), Post.class);
-            postRepository.save(post);
+            PostRequest post = objectMapper.readValue(responseEntity.getBody(), PostRequest.class);
+            Post savePost = Post.builder()
+                    .id(post.getIdPost())
+                    .title(post.getTitlePost())
+                    .body(post.getBodyPost())
+                    .userId(post.getUserIdPost())
+                    .build();
 
-            PostResponse response = toPostResponse(post);
+            postRepository.save(savePost);
+
+            PostResponse response = toPostResponse(savePost);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IOException exception) {
             exception.printStackTrace();

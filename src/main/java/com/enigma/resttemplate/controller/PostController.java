@@ -1,7 +1,8 @@
 package com.enigma.resttemplate.controller;
 
+import com.enigma.resttemplate.dto.request.PostRequest;
 import com.enigma.resttemplate.entities.Post;
-import com.enigma.resttemplate.response.PostResponse;
+import com.enigma.resttemplate.dto.response.PostResponse;
 import com.enigma.resttemplate.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -34,7 +35,7 @@ public class PostController {
 
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostResponse> createPost(@RequestBody Post request){
+    public ResponseEntity<PostResponse> createPost(@RequestBody PostRequest request){
         return postService.createPost(request);
     }
 }
