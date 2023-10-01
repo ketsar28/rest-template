@@ -33,8 +33,8 @@ public class PostService {
 
     private static PostResponse toPostResponse(Post post) {
         return PostResponse.builder()
-                .idPost(post.getUserId())
-                .userIdPost(post.getId())
+                .idPost(post.getId())
+                .userIdPost(post.getUserId())
                 .titlePost(post.getTitle())
                 .bodyPost(post.getBody())
                 .build();
@@ -90,8 +90,15 @@ public class PostService {
     }
 
     public ResponseEntity<PostResponse> getPostById(Integer id) {
-        String apiUrls = BASE_URL + "/posts/"+id;
-        return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
+        Optional<Post> isPostExists = postRepository.findById(id);
+        if(isPostExists.isPresent()) {
+            Post post = isPostExists.get();
+            PostResponse postResponse = toPostResponse(post);
+            return ResponseEntity.ok(postResponse);
+        } else {
+            String apiUrls = BASE_URL + "/posts/"+id;
+            return responseMethodGet(restTemplate.getForEntity(apiUrls, Post.class));
+        }
     }
 
     public ResponseEntity<List<PostResponse>> getPostCommentsByPostId(Integer postId) {
