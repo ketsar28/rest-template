@@ -37,14 +37,4 @@ public class PostController {
     public ResponseEntity<PostResponse> createPost(@RequestBody Post request){
         return postService.createPost(request);
     }
-
-    @PutMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<PostResponse> updatePost(@RequestBody Post request, @PathVariable Integer id){
-        return postService.updatePost(request, id);
-    }
-
-    @DeleteMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> deletePost(@PathVariable Integer id){
-        return postService.deletePost(id);
-    }
 }

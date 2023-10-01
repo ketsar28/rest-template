@@ -110,31 +110,4 @@ public class PostService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
-
-    public ResponseEntity<PostResponse> updatePost(Post request, Integer id){
-       Optional<Post> isExistsPost = postRepository.findById(id);
-
-        if(isExistsPost.isPresent()) {
-            Post post = isExistsPost.get();
-
-            post.setTitle(request.getTitle());
-            post.setBody(request.getBody());
-            post = postRepository.save(post);
-
-            PostResponse postResponse = toPostResponse(post);
-
-            return ResponseEntity.ok(postResponse);
-        }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post not found");
-    }
-
-    public ResponseEntity<String> deletePost(Integer id) {
-        Optional<Post> isPostExists = postRepository.findById(id);
-        if(isPostExists.isPresent()) {
-            postRepository.deleteById(id);
-            return ResponseEntity.ok("data in " + id + " has been deleted");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("post not found");
-        }
-    }
 }
